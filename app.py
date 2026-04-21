@@ -5,7 +5,7 @@ from datetime import datetime
 
 # 🔥 Statsig
 from statsig import statsig
-statsig.initialize(os.getenv("STATSIG_SERVER_KEY"))
+statsig.initialize("secret-yayJOjJi3tQ3Ch9Bu6G9DgyKZEWv4cRi9BEqnzB7Yue")
 
 app = Flask(__name__, template_folder='templates')
 CORS(app)
