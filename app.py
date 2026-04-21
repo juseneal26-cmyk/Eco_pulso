@@ -9,6 +9,7 @@ statsig.initialize(os.getenv("STATSIG_SERVER_KEY"))
 
 app = Flask(__name__, template_folder='templates')
 CORS(app)
+
 DB = os.path.join(os.path.dirname(__file__), 'ecopulso.db')
 
 def get_db():
