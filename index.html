@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoPulso — Energía Viva</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ════════════════════════════════════════════
+   ROOT & RESET
+════════════════════════════════════════════ */
+    :root {
+      --ink: #03080d;
+      --deep: #040e16;
+      --abyss: #020a11;
+      --glow: #00ffe0;
+      --glow2: #00c9a7;
+      --glow3: #00ffb3;
+      --pulse: #7fffda;
+      --acid: #c8ff00;
+      --warm: #ff6b35;
+      --rose: #ff3d6b;
+      --text: #d4f5ed;
+      --muted: #4a8a7a;
+      --dim: #1a3a30;
+      --border: rgba(0, 255, 224, 0.12);
+      --border2: rgba(0, 255, 224, 0.25);
+      --card: rgba(4, 20, 15, 0.85);
+      --card2: rgba(2, 14, 10, 0.9);
+      --r: 16px;
+    }
+
+    *,
+    ::before,
+    ::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--abyss);
+      color: var(--text);
+      overflow-x: hidden;
+      cursor: none;
+      min-height: 100vh;
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--abyss)
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--glow2);
+      border-radius: 2px
+    }
+
+    /* ════════ CUSTOM CURSOR ════════ */
+    #cursor {
+      position: fixed;
+      width: 12px;
+      height: 12px;
+      background: var(--glow);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 99999;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 20px var(--glow), 0 0 40px rgba(0, 255, 224, 0.4);
+      transition: transform .1s, width .2s, height .2s;
+    }
+
+    #cursor-ring {
+      position: fixed;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(0, 255, 224, 0.4);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 99998;
+      transform: translate(-50%, -50%);
+      transition: transform .12s ease, width .3s, height .3s, border-color .3s;
+    }
+
+    body:has(button:hover) #cursor {
+      width: 20px;
+      height: 20px
+    }
+
+    body:has(a:hover) #cursor-ring {
+      border-color: var(--glow);
+      width: 50px;
+      height: 50px
+    }
+
+    /* ════════ CANVAS BG ════════ */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: .7
+    }
+
+    /* ════════ PAGES ════════ */
+    .page {
+      display: none;
+      position: relative;
+      z-index: 1;
+      min-height: 100vh
+    }
+
+    .page.active {
+      display: flex
+    }
+
+    /* ════════════════════════════════════════════
+   AUTH
+════════════════════════════════════════════ */
+    #page-auth {
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 460px;
+      position: relative;
+    }
+
+    /* Glowing orb behind auth card */
+    .auth-container::before {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(0, 255, 224, .15) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: breathe 4s ease-in-out infinite;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @keyframes breathe {
+
+      0%,
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: .7
+      }
+
+      50% {
+        transform: translate(-50%, -50%) scale(1.15);
+        opacity: 1
+      }
+    }
+
+    .auth-card {
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      backdrop-filter: blur(40px);
+      box-shadow: 0 0 80px rgba(0, 255, 224, .08), inset 0 1px 0 rgba(0, 255, 224, .2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-card::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 20%;
+      right: 20%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--glow), transparent);
+    }
+
+    .logo-mark {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .logo-svg {
+      display: inline-block;
+      animation: logo-pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes logo-pulse {
+
+      0%,
+      100% {
+        filter: drop-shadow(0 0 8px var(--glow)) drop-shadow(0 0 20px rgba(0, 255, 224, .3))
+      }
+
+      50% {
+        filter: drop-shadow(0 0 15px var(--glow)) drop-shadow(0 0 40px rgba(0, 255, 224, .5))
+      }
+    }
+
+    .logo-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -.04em;
+      background: linear-gradient(135deg, var(--glow) 0%, var(--glow2) 50%, var(--pulse) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: block;
+      margin-top: .5rem;
+    }
+
+    .logo-sub {
+      font-size: .75rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      margin-top: .2rem;
+    }
+
+    .auth-tabs {
+      display: flex;
+      background: rgba(0, 0, 0, .3);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: .6rem;
+      border-radius: 9px;
+      font-family: 'Outfit', sans-serif;
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: none;
+      transition: all .25s;
+      letter-spacing: .01em;
+    }
+
+    .tab-btn.on {
+      background: linear-gradient(135deg, rgba(0, 255, 224, .15), rgba(0, 201, 167, .1));
+      color: var(--glow);
+      box-shadow: 0 0 20px rgba(0, 255, 224, .1);
+    }
+
+    .field {
+      margin-bottom: 1.2rem
+    }
+
+    .field label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: .5rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      padding: .85rem 1.1rem;
+      background: rgba(0, 0, 0, .4);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .3s, box-shadow .3s;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--glow2);
+      box-shadow: 0 0 0 3px rgba(0, 255, 224, .1), 0 0 20px rgba(0, 255, 224, .05);
+    }
+
+    .field select option {
+      background: #040e16
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      cursor: none;
+      background: linear-gradient(135deg, var(--glow2), var(--glow));
+      color: var(--abyss);
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .3s;
+      box-shadow: 0 0 30px rgba(0, 255, 224, .25);
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, .2), transparent);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 40px rgba(0, 255, 224, .4);
+    }
+
+    .btn-primary:hover::before {
+      opacity: 1
+    }
+
+    .auth-msg {
+      font-size: .82rem;
+      text-align: center;
+      margin-top: .8rem;
+      min-height: 1.2rem;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .auth-msg.err {
+      color: var(--rose)
+    }
+
+    .auth-msg.ok {
+      color: var(--glow)
+    }
+
+    .demo-hint {
+      margin-top: 1.5rem;
+      text-align: center;
+      padding: .8rem;
+      background: rgba(0, 255, 224, .04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: .78rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      line-height: 1.8;
+    }
+
+    .demo-hint span {
+      color: var(--glow2)
+    }
+
+    /* ════════════════════════════════════════════
+   APP SHELL
+════════════════════════════════════════════ */
+    #page-app {
+      flex-direction: column
+    }
+
+    /* ── TOPBAR & NAVIGATION */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: rgba(2, 10, 8, .95);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      z-index: 200;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+    }
+
+    .tb-nav {
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 0 1.2rem;
+      height: 100%;
+      font-family: 'Outfit', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: none;
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      transition: all .2s;
+    }
+
+    .nav-item:hover, .nav-item.on {
+      color: var(--glow);
+    }
+    
+    .nav-item.on {
+      border-bottom-color: var(--glow);
+      background: linear-gradient(180deg, transparent, rgba(0,255,224,0.08));
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .user-info-tb {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .logout-pill {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: .4rem 1rem;
+      font-size: .75rem;
+      color: var(--muted);
+      cursor: none;
+      font-family: 'Space Mono', monospace;
+      transition: all .2s;
+    }
+
+    .logout-pill:hover {
+      border-color: var(--rose);
+      color: var(--rose);
+      background: rgba(255,61,107,0.08);
+    }
+
+    /* ── MAIN CONTENT */
+    .main {
+      margin-left: 0;
+      margin-top: 72px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ════════════════════════════════════════════
+   VIEWS (NOW SECTIONS)
+════════════════════════════════════════════ */
+    .view {
+      display: block;
+      padding: calc(72px + 2rem) 2rem 4rem 2rem;
+      min-height: 100vh;
+      border-bottom: 1px dashed var(--border2);
+    }
+    .view:last-child {
+      border-bottom: none;
+    }
+
+    /* ── PAGE HEADER */
+    .ph {
+      margin-bottom: 2rem
+    }
+
+    .ph-eyebrow {
+      font-size: .72rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--glow2);
+      font-family: 'Space Mono', monospace;
+      margin-bottom: .4rem;
+    }
+
+    .ph-title {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    .ph-sub {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-top: .3rem;
+      font-weight: 300
+    }
+
+    /* ════════ KPI CARDS ════════ */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem
+    }
+
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 1.6rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+    }
+
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--kpi-color, rgba(0, 255, 224, .08)) 0%, transparent 70%);
+      transform: translate(30%, -30%);
+      pointer-events: none;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border2);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, .5), 0 0 30px var(--kpi-shadow, rgba(0, 255, 224, .06));
+    }
+
+    .kpi-icon {
+      font-size: 1.4rem;
+      margin-bottom: .8rem;
+      filter: drop-shadow(0 0 8px var(--glow2));
+    }
+
+    .kpi-label {
+      font-size: .7rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      margin-bottom: .5rem;
+    }
+
+    .kpi-val {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -.04em;
+      line-height: 1;
+      margin-bottom: .25rem;
+    }
+
+    .kpi-unit {
+      font-size: .72rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace
+    }
+
+    .kpi-delta {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      font-size: .72rem;
+      font-weight: 700;
+      margin-top: .6rem;
+      padding: .2rem .6rem;
+      border-radius: 100px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .delta-up {
+      background: rgba(0, 255, 224, .1);
+      color: var(--glow)
+    }
+
+    .delta-dn {
+      background: rgba(255, 61, 107, .1);
+      color: var(--rose)
+    }
+
+    /* ════════ CHARTS ROW ════════ */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem
+    }
+
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chart-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--glow2), transparent);
+      opacity: .4;
+    }
+
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-title {
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+    }
+
+    .chart-total {
+      font-family: 'Space Mono', monospace;
+      font-size: .75rem;
+      color: var(--glow2);
+    }
+
+    /* ── WAVE BAR CHART */
+    .wavebars {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 160px;
+      padding-bottom: 28px;
+      position: relative;
+    }
+
+    .wavebars::after {
+      content: '';
+      position: absolute;
+      bottom: 28px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .wb {
+      flex: 1;
+      border-radius: 4px 4px 0 0;
+      background: linear-gradient(180deg, rgba(0, 255, 224, .7) 0%, rgba(0, 201, 167, .3) 100%);
+      position: relative;
+      cursor: none;
+      min-height: 4px;
+      transition: background .3s;
+      box-shadow: 0 0 8px rgba(0, 255, 224, .15);
+    }
+
+    .wb::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 4px 4px 0 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .15) 0%, transparent 40%);
+    }
+
+    .wb.peak {
+      background: linear-gradient(180deg, var(--glow) 0%, var(--glow2) 100%);
+      box-shadow: 0 0 20px rgba(0, 255, 224, .4), 0 -4px 15px rgba(0, 255, 224, .2);
+    }
+
+    .wb:hover {
+      background: linear-gradient(180deg, var(--acid) 0%, rgba(200, 255, 0, .3) 100%);
+      box-shadow: 0 0 20px rgba(200, 255, 0, .3);
+    }
+
+    .wb-tip {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--glow);
+      color: var(--abyss);
+      font-size: .62rem;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .wb:hover .wb-tip {
+      opacity: 1
+    }
+
+    .wb-lbl {
+      position: absolute;
+      bottom: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: .6rem;
+      color: var(--muted);
+      white-space: nowrap;
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* ── AREA CHART (SVG) */
+    .area-viz {
+      position: relative;
+      height: 160px
+    }
+
+    .area-svg {
+      width: 100%;
+      height: 100%
+    }
+
+    .area-legend {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem
+    }
+
+    .al-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-size: .82rem
+    }
+
+    .al-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .al-name {
+      flex: 1;
+      color: var(--muted)
+    }
+
+    .al-bar-wrap {
+      width: 80px;
+      height: 4px;
+      background: rgba(255, 255, 255, .06);
+      border-radius: 2px;
+      overflow: hidden
+    }
+
+    .al-bar {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 1s ease
+    }
+
+    .al-val {
+      font-weight: 700;
+      font-size: .78rem;
+      font-family: 'Space Mono', monospace;
+      min-width: 50px;
+      text-align: right
+    }
+
+    /* ════════ DATA TABLE ════════ */
+    .tbl-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    .tbl-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tbl-head-title {
+      font-size: .85rem;
+      font-weight: 700;
+      letter-spacing: -.01em;
+    }
+
+    .tbl-wrap {
+      overflow-x: auto
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse
+    }
+
+    th {
+      padding: .8rem 1.2rem;
+      font-size: .65rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0, 0, 0, .2);
+    }
+
+    td {
+      padding: .85rem 1.2rem;
+      font-size: .85rem;
+      border-bottom: 1px solid rgba(0, 255, 224, .04);
+      transition: background .15s;
+    }
+
+    tr:hover td {
+      background: rgba(0, 255, 224, .03)
+    }
+
+    tr:last-child td {
+      border-bottom: none
+    }
+
+    .area-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .25rem .7rem;
+      border-radius: 100px;
+      font-size: .72rem;
+      font-weight: 700;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .kwh-val {
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      color: var(--glow2)
+    }
+
+    .co2-val {
+      font-family: 'Space Mono', monospace;
+      font-size: .78rem;
+      color: var(--muted)
+    }
+
+    .date-val {
+      font-family: 'Space Mono', monospace;
+      font-size: .78rem;
+      color: var(--muted)
+    }
+
+    .icon-btn {
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: .3rem .5rem;
+      cursor: none;
+      color: var(--muted);
+      transition: all .2s;
+      font-size: .85rem;
+    }
+
+    .icon-btn:hover {
+      border-color: var(--rose);
+      color: var(--rose);
+      background: rgba(255, 61, 107, .08)
+    }
+
+    /* ════════ FORMS ════════ */
+    .form-shell {
+      max-width: 660px
+    }
+
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .form-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--glow2), transparent);
+      opacity: .4;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem
+    }
+
+    .form-grid .full {
+      grid-column: 1/-1
+    }
+
+    .btn-submit {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .85rem 2rem;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: .92rem;
+      font-weight: 700;
+      cursor: none;
+      background: linear-gradient(135deg, var(--glow2), var(--glow));
+      color: var(--abyss);
+      transition: transform .2s, box-shadow .3s;
+      box-shadow: 0 0 25px rgba(0, 255, 224, .2);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 35px rgba(0, 255, 224, .35)
+    }
+
+    .result-card {
+      background: rgba(0, 255, 224, .04);
+      border: 1px solid rgba(0, 255, 224, .2);
+      border-radius: var(--r);
+      padding: 1.8rem;
+      display: none;
+      margin-top: 1.5rem;
+      animation: fadeIn .4s ease;
+    }
+
+    .result-head {
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--glow);
+      font-family: 'Space Mono', monospace;
+      margin-bottom: 1rem;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem
+    }
+
+    .result-item {
+      text-align: center;
+      padding: 1rem;
+      background: rgba(0, 0, 0, .3);
+      border-radius: 10px
+    }
+
+    .ri-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--glow);
+      line-height: 1;
+      margin-bottom: .3rem;
+    }
+
+    .ri-lbl {
+      font-size: .7rem;
+      color: var(--muted);
+      letter-spacing: .05em
+    }
+
+    /* ════════ LOADING ════════ */
+    .loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      gap: 1rem;
+    }
+
+    .loader-ring {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      border-top-color: var(--glow);
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .loader-txt {
+      font-size: .75rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace
+    }
+
+    /* ════════ SIM HISTORY ════════ */
+    .sim-hist {
+      margin-top: 2rem
+    }
+
+    .sim-hist-title {
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      margin-bottom: 1rem;
+    }
+
+    /* ════════ USERS ════════ */
+    .user-row-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(0, 255, 224, .2), rgba(0, 201, 167, .1));
+      border: 1px solid var(--border);
+      display: inline-grid;
+      place-items: center;
+      font-size: .85rem;
+      vertical-align: middle;
+      margin-right: .6rem;
+    }
+
+    /* ════════ RESPONSIVE ════════ */
+    @media(max-width:900px) {
+      .kpi-row { grid-template-columns: repeat(2, 1fr) }
+      .charts-row { grid-template-columns: 1fr }
+      .form-grid { grid-template-columns: 1fr }
+      .topbar { padding: 0 1rem; }
+      .nav-item { padding: 0 .6rem; font-size: .8rem; }
+      .user-info-tb { display: none; }
+    }
+
+    /* ════════ UTILITY ════════ */
+    .mt1 {
+      margin-top: 1rem
+    }
+
+    .mt2 {
+      margin-top: 2rem
+    }
+
+    .empty-state {
+      padding: 3rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: .85rem;
+      font-family: 'Space Mono', monospace;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- CURSOR -->
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- BG CANVAS -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- ══════════════════════════════════════
+     AUTH
+══════════════════════════════════════ -->
+  <div id="page-auth" class="page active">
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="logo-mark">
+          <div class="logo-svg">
+            <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+              <circle cx="28" cy="28" r="27" stroke="rgba(0,255,224,0.3)" stroke-width="1" />
+              <circle cx="28" cy="28" r="20" stroke="rgba(0,255,224,0.15)" stroke-width="1" stroke-dasharray="4 4" />
+              <path d="M28 14 L34 26 L28 22 L22 26 Z" fill="rgba(0,255,224,0.9)" />
+              <path d="M28 42 L22 30 L28 34 L34 30 Z" fill="rgba(0,201,167,0.7)" />
+              <circle cx="28" cy="28" r="3" fill="#00ffe0" />
+            </svg>
+          </div>
+          <span class="logo-text">EcoPulso</span>
+          <div class="logo-sub">Energía · Datos · Sostenibilidad</div>
+        </div>
+
+        <div class="auth-tabs">
+          <button class="tab-btn on" onclick="authTab('login',this)">Iniciar sesión</button>
+          <button class="tab-btn" onclick="authTab('reg',this)">Registrarse</button>
+        </div>
+
+        <div id="t-login">
+          <div class="field"><label>Correo electrónico</label>
+            <input type="email" id="l-mail" placeholder="admin@ecopulso.co" value="admin@ecopulso.co">
+          </div>
+          <div class="field"><label>Contraseña</label>
+            <input type="password" id="l-pw" placeholder="••••••••" value="admin123">
+          </div>
+          <button class="btn-primary" onclick="doLogin()">Entrar al sistema →</button>
+          <div class="auth-msg" id="l-msg"></div>
+        </div>
+
+        <div id="t-reg" style="display:none">
+          <div class="field"><label>Nombre completo</label>
+            <input type="text" id="r-name" placeholder="Tu nombre">
+          </div>
+          <div class="field"><label>Correo electrónico</label>
+            <input type="email" id="r-mail" placeholder="correo@ejemplo.com">
+          </div>
+          <div class="field"><label>Contraseña</label>
+            <input type="password" id="r-pw" placeholder="Mínimo 6 caracteres">
+          </div>
+          <button class="btn-primary" onclick="doReg()">Crear cuenta →</button>
+          <div class="auth-msg" id="r-msg"></div>
+        </div>
+
+        <div class="demo-hint">
+          Demo rápido → <span>admin@ecopulso.co</span> / <span>admin123</span><br>
+          ODS 7 · Meta 7.3 · Universidad Cooperativa de Colombia
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+     APP
+══════════════════════════════════════ -->
+  <div id="page-app" class="page">
+
+    <!-- TOPBAR WITH NAVIGATION -->
+    <header class="topbar">
+      <div class="tb-logo" style="display:flex;align-items:center;gap:.7rem">
+        <svg width="28" height="28" viewBox="0 0 56 56" fill="none">
+          <path d="M28 10L36 26L28 20L20 26Z" fill="#00ffe0" />
+          <path d="M28 46L20 30L28 36L36 30Z" fill="#00c9a7" />
+          <circle cx="28" cy="28" r="4" fill="#00ffe0" />
+        </svg>
+        <span class="logo-text" style="font-size: 1.2rem; margin:0">EcoPulso</span>
+      </div>
+
+      <nav class="tb-nav">
+        <a href="#view-dashboard" class="nav-item on">Dashboard</a>
+        <a href="#view-consumos" class="nav-item">Historial</a>
+        <a href="#view-registro" class="nav-item">Registrar</a>
+        <a href="#view-simulacion" class="nav-item">Simulación</a>
+        <a href="#view-usuarios" class="nav-item">Usuarios</a>
+      </nav>
+
+      <div class="topbar-right">
+        <div class="user-info-tb">
+           <span id="sb-name">—</span> <span style="color:var(--border2); margin:0 8px">|</span> <span id="sb-role" style="color:var(--muted)">gestor</span>
+        </div>
+        <button class="logout-pill" onclick="logout()">⏻ Salir</button>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- ─── DASHBOARD ─── -->
+      <div id="view-dashboard" class="view active">
+        <div class="ph">
+          <div class="ph-eyebrow">ODS 7 · Meta 7.3 · Campus Montería</div>
+          <div class="ph-title" id="dash-title">Cargando datos…</div>
+          <div class="ph-sub">Monitoreo de consumo energético en tiempo real</div>
+        </div>
+
+        <div class="kpi-row">
+          <div class="kpi-card" style="--kpi-color:rgba(0,255,224,.08);--kpi-shadow:rgba(0,255,224,.08)">
+            <div class="kpi-icon">⚡</div>
+            <div class="kpi-label">Consumo este mes</div>
+            <div class="kpi-val" id="k-kwh" style="color:var(--glow)">—</div>
+            <div class="kpi-unit">kWh</div>
+            <div class="kpi-delta" id="k-delta">—</div>
+          </div>
+          <div class="kpi-card" style="--kpi-color:rgba(200,255,0,.06);--kpi-shadow:rgba(200,255,0,.05)">
+            <div class="kpi-icon">💰</div>
+            <div class="kpi-label">Costo estimado</div>
+            <div class="kpi-val" id="k-costo" style="color:var(--acid)">—</div>
+            <div class="kpi-unit">pesos colombianos</div>
+          </div>
+          <div class="kpi-card" style="--kpi-color:rgba(255,107,53,.06);--kpi-shadow:rgba(255,107,53,.05)">
+            <div class="kpi-icon">🌿</div>
+            <div class="kpi-label">Emisiones CO₂</div>
+            <div class="kpi-val" id="k-co2" style="color:var(--warm)">—</div>
+            <div class="kpi-unit">toneladas / mes</div>
+          </div>
+          <div class="kpi-card" style="--kpi-color:rgba(0,255,179,.06);--kpi-shadow:rgba(0,255,179,.05)">
+            <div class="kpi-icon">📈</div>
+            <div class="kpi-label">Eficiencia ODS</div>
+            <div class="kpi-val" id="k-ef" style="color:var(--pulse)">—</div>
+            <div class="kpi-unit">índice global</div>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-head">
+              <div class="chart-title">Consumo mensual</div>
+              <div class="chart-total" id="chart-total">— kWh total</div>
+            </div>
+            <div class="wavebars" id="wbars"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-head">
+              <div class="chart-title">Distribución por área</div>
+            </div>
+            <div class="area-legend" id="area-leg"></div>
+          </div>
+        </div>
+
+        <div class="tbl-card">
+          <div class="tbl-head">
+            <div class="tbl-head-title">Registros recientes</div>
+            <button class="btn-submit" style="padding:.5rem 1.2rem;font-size:.8rem"
+              onclick="document.getElementById('view-registro').scrollIntoView()">+ Nuevo registro</button>
+          </div>
+          <div id="recent-tbl">
+            <div class="loader">
+              <div class="loader-ring"></div>
+              <div class="loader-txt">Cargando...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── HISTORIAL ─── -->
+      <div id="view-consumos" class="view">
+        <div class="ph">
+          <div class="ph-eyebrow">Base de datos · SQLite</div>
+          <div class="ph-title">Historial completo</div>
+          <div class="ph-sub">Todos los registros de consumo energético almacenados</div>
+        </div>
+        <div class="tbl-card">
+          <div id="all-tbl">
+            <div class="loader">
+              <div class="loader-ring"></div>
+              <div class="loader-txt">Cargando...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── REGISTRO ─── -->
+      <div id="view-registro" class="view">
+        <div class="ph">
+          <div class="ph-eyebrow">Ingreso manual de datos</div>
+          <div class="ph-title">Registrar consumo</div>
+          <div class="ph-sub">Agrega un nuevo registro a la base de datos</div>
+        </div>
+        <div class="form-shell">
+          <div class="form-card">
+            <div class="form-grid">
+              <div class="field">
+                <label>Área / Sección</label>
+                <select id="f-area">
+                  <option>Aulas</option>
+                  <option>Laboratorios</option>
+                  <option>Administrativo</option>
+                  <option>Biblioteca</option>
+                  <option>Cafetería</option>
+                  <option>Otros</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Consumo (kWh)</label>
+                <input type="number" id="f-kwh" placeholder="Ej: 450.5" step="0.1" min="0">
+              </div>
+              <div class="field">
+                <label>Fecha de registro</label>
+                <input type="date" id="f-fecha">
+              </div>
+              <div class="field">
+                <label>Código de medidor</label>
+                <input type="text" id="f-med" placeholder="Ej: MED-01">
+              </div>
+            </div>
+            <div style="margin-top:1.5rem;display:flex;gap:1rem;align-items:center">
+              <button class="btn-submit" onclick="saveConsumo()">💾 Guardar en base de datos</button>
+              <div class="auth-msg" id="f-msg" style="margin:0"></div>
+            </div>
+          </div>
+
+          <div class="result-card" id="f-result">
+            <div class="result-head">✓ Registro guardado exitosamente en SQLite</div>
+            <div class="result-grid">
+              <div class="result-item">
+                <div class="ri-val" id="rv-kwh">—</div>
+                <div class="ri-lbl">kWh registrados</div>
+              </div>
+              <div class="result-item">
+                <div class="ri-val" id="rv-co2">—</div>
+                <div class="ri-lbl">kg CO₂ calculados</div>
+              </div>
+              <div class="result-item">
+                <div class="ri-val" id="rv-area">—</div>
+                <div class="ri-lbl">Área registrada</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── SIMULACIÓN ─── -->
+      <div id="view-simulacion" class="view">
+        <div class="ph">
+          <div class="ph-eyebrow">Proyección energética</div>
+          <div class="ph-title">Simulación de ahorro</div>
+          <div class="ph-sub">Modela el impacto de reducir el consumo en tu institución</div>
+        </div>
+        <div class="form-shell">
+          <div class="form-card">
+            <div class="form-grid">
+              <div class="field">
+                <label>Consumo actual (kWh/mes)</label>
+                <input type="number" id="s-actual" placeholder="Ej: 4820" min="0" oninput="calcSim()">
+              </div>
+              <div class="field">
+                <label>% de reducción esperado</label>
+                <input type="number" id="s-pct" placeholder="Ej: 20" min="1" max="99" oninput="calcSim()">
+              </div>
+              <div class="field full">
+                <label>Descripción de la medida</label>
+                <input type="text" id="s-desc" placeholder="Ej: Cambio a iluminación LED en aulas">
+              </div>
+            </div>
+            <div style="margin-top:1.5rem;display:flex;gap:1rem;align-items:center">
+              <button class="btn-submit" onclick="simular()">💾 Guardar simulación</button>
+              <div class="auth-msg err" id="s-msg" style="margin:0"></div>
+            </div>
+          </div>
+
+          <div class="result-card" id="s-result">
+            <div class="result-head">Proyección de ahorro energético</div>
+            <div class="result-grid">
+              <div class="result-item">
+                <div class="ri-val" id="sv-proy" style="color:var(--glow2)">—</div>
+                <div class="ri-lbl">kWh / mes proyectados</div>
+              </div>
+              <div class="result-item">
+                <div class="ri-val" id="sv-cop" style="color:var(--acid)">—</div>
+                <div class="ri-lbl">COP ahorro mensual</div>
+              </div>
+              <div class="result-item">
+                <div class="ri-val" id="sv-co2" style="color:var(--warm)">—</div>
+                <div class="ri-lbl">kg CO₂ evitados</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sim-hist">
+            <div class="sim-hist-title">— Simulaciones guardadas en base de datos</div>
+            <div class="tbl-card">
+              <div id="sim-tbl">
+                <div class="loader">
+                  <div class="loader-ring"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── USUARIOS ─── -->
+      <div id="view-usuarios" class="view">
+        <div class="ph">
+          <div class="ph-eyebrow">Gestión de acceso</div>
+          <div class="ph-title">Usuarios del sistema</div>
+          <div class="ph-sub">Cuentas registradas en EcoPulso</div>
+        </div>
+        <div class="tbl-card">
+          <div id="users-tbl">
+            <div class="loader">
+              <div class="loader-ring"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div><!-- page-app -->
+
+  <script>
+    /* ══════════════════════════════════════════
+       CANVAS — BIOLUMINESCENT PARTICLES
+    ══════════════════════════════════════════ */
+    (function () {
+      const cv = document.getElementById('bg-canvas');
+      const cx = cv.getContext('2d');
+      let W, H, pts = [];
+
+      function resize() { W = cv.width = innerWidth; H = cv.height = innerHeight }
+      resize(); window.addEventListener('resize', resize);
+
+      class Pt {
+        constructor() { this.reset() }
+        reset() {
+          this.x = Math.random() * W; this.y = Math.random() * H;
+          this.r = Math.random() * 1.8 + .3;
+          this.vx = (Math.random() - .5) * .25; this.vy = (Math.random() - .5) * .25;
+          this.a = Math.random(); this.da = (Math.random() - .5) * .008;
+          this.hue = 160 + Math.random() * 40;
+        }
+        update() {
+          this.x += this.vx; this.y += this.vy;
+          this.a += this.da;
+          if (this.a <= 0 || this.a >= 1) this.da *= -1;
+          if (this.x < -10 || this.x > W + 10 || this.y < -10 || this.y > H + 10) this.reset();
+        }
+        draw() {
+          cx.save();
+          cx.globalAlpha = this.a * .5;
+          const g = cx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 6);
+          g.addColorStop(0, `hsla(${this.hue},100%,70%,.8)`);
+          g.addColorStop(1, 'transparent');
+          cx.fillStyle = g;
+          cx.beginPath(); cx.arc(this.x, this.y, this.r * 6, 0, Math.PI * 2); cx.fill();
+          cx.globalAlpha = this.a;
+          cx.fillStyle = `hsla(${this.hue},100%,80%,1)`;
+          cx.beginPath(); cx.arc(this.x, this.y, this.r, 0, Math.PI * 2); cx.fill();
+          cx.restore();
+        }
+      }
+
+      // Grid lines
+      function drawGrid() {
+        cx.strokeStyle = 'rgba(0,255,224,0.025)'; cx.lineWidth = 1;
+        for (let x = 0; x < W; x += 80) { cx.beginPath(); cx.moveTo(x, 0); cx.lineTo(x, H); cx.stroke() }
+        for (let y = 0; y < H; y += 80) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(W, y); cx.stroke() }
+      }
+
+      // Connecting lines between close particles
+      function drawLines() {
+        for (let i = 0; i < pts.length; i++)for (let j = i + 1; j < pts.length; j++) {
+          const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < 120) {
+            cx.globalAlpha = (1 - d / 120) * .08;
+            cx.strokeStyle = 'rgba(0,255,224,1)'; cx.lineWidth = .5;
+            cx.beginPath(); cx.moveTo(pts[i].x, pts[i].y); cx.lineTo(pts[j].x, pts[j].y); cx.stroke();
+            cx.globalAlpha = 1;
+          }
+        }
+      }
+
+      for (let i = 0; i < 80; i++) pts.push(new Pt());
+
+      function loop() {
+        cx.clearRect(0, 0, W, H);
+        drawGrid();
+        drawLines();
+        pts.forEach(p => { p.update(); p.draw() });
+        requestAnimationFrame(loop);
+      }
+      loop();
+    })();
+
+    /* ══ CURSOR ══ */
+    const cur = document.getElementById('cursor'), ring = document.getElementById('cursor-ring');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cur.style.left = mx + 'px'; cur.style.top = my + 'px'
+    });
+    function animRing() {
+      rx += (mx - rx) * .12; ry += (my - ry) * .12;
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(animRing);
+    } animRing();
+
+    /* ══════════════════════════════════════════
+       APP STATE
+    ══════════════════════════════════════════ */
+    const API = 'http://localhost:5050/api';
+    let user = null;
+
+    /* ══ AUTH ══ */
+    function authTab(t, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      document.getElementById('t-login').style.display = t === 'login' ? 'block' : 'none';
+      document.getElementById('t-reg').style.display = t === 'reg' ? 'block' : 'none';
+    }
+
+    async function doLogin() {
+      const correo = document.getElementById('l-mail').value.trim();
+      const contrasena = document.getElementById('l-pw').value;
+      const msg = document.getElementById('l-msg');
+      if (!correo || !contrasena) { msg.className = 'auth-msg err'; msg.textContent = 'Completa los campos'; return }
+      try {
+        const r = await fetch(API + '/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ correo, contrasena })
+        });
+        const d = await r.json();
+        if (d.ok) { user = d.usuario; enterApp() }
+        else { msg.className = 'auth-msg err'; msg.textContent = d.msg }
+      } catch { msg.className = 'auth-msg err'; msg.textContent = 'Error de conexión — ¿Está corriendo el servidor?' }
+    }
+
+    async function doReg() {
+      const nombre = document.getElementById('r-name').value.trim();
+      const correo = document.getElementById('r-mail').value.trim();
+      const contrasena = document.getElementById('r-pw').value;
+      const msg = document.getElementById('r-msg');
+      if (!nombre || !correo || !contrasena) { msg.className = 'auth-msg err'; msg.textContent = 'Completa todos los campos'; return }
+      try {
+        const r = await fetch(API + '/registro', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, correo, contrasena })
+        });
+        const d = await r.json();
+        if (d.ok) { user = d.usuario; enterApp() }
+        else { msg.className = 'auth-msg err'; msg.textContent = d.msg }
+      } catch { msg.className = 'auth-msg err'; msg.textContent = 'Error de conexión' }
+    }
+
+    function enterApp() {
+      document.getElementById('page-auth').classList.remove('active');
+      document.getElementById('page-app').classList.add('active');
+      document.getElementById('sb-name').textContent = user.nombre;
+      document.getElementById('sb-role').textContent = user.rol;
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('f-fecha').value = hoy;
+      
+      // Cargar todas las secciones para scroll
+      loadDash();
+      loadAll();
+      loadSims();
+      loadUsers();
+    }
+
+    function logout() {
+      user = null;
+      document.getElementById('page-app').classList.remove('active');
+      document.getElementById('page-auth').classList.add('active');
+    }
+
+    /* ══ OBSERVER ══ */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
+          const id = entry.target.id;
+          document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('on'));
+          const link = document.querySelector(`.nav-item[href="#${id}"]`);
+          if (link) link.classList.add('on');
+        }
+      });
+    }, { threshold: 0.3 });
+
+    document.querySelectorAll('.view').forEach(v => observer.observe(v));
+
+    /* ══════ DASHBOARD ══════ */
+    const MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const ACOLORS = ['#00ffe0', '#00c9a7', '#c8ff00', '#ff6b35', '#ff3d6b', '#7fffda'];
+
+    async function loadDash() {
+      try {
+        const r = await fetch(API + '/stats');
+        const d = await r.json();
+        const now = new Date();
+        document.getElementById('dash-title').textContent =
+          `${now.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`;
+
+        animCount('k-kwh', d.kwh_actual, '', 0);
+        animCount('k-costo', d.costo, '$', 0, true);
+        animCount('k-co2', d.co2, '', 3);
+        animCount('k-ef', d.eficiencia, '%', 1);
+
+        const dEl = document.getElementById('k-delta');
+        const pos = d.delta <= 0;
+        dEl.className = 'kpi-delta ' + (pos ? 'delta-up' : 'delta-dn');
+        dEl.textContent = (pos ? '↓ ' : '↑ ') + Math.abs(d.delta) + '% vs mes anterior';
+
+        buildWaveBars(d.por_mes);
+        buildAreaLeg(d.por_area);
+
+        const total = d.por_mes.reduce((s, m) => s + m.total, 0);
+        document.getElementById('chart-total').textContent = Math.round(total).toLocaleString('es-CO') + ' kWh total';
+
+        loadRecent();
+      } catch (e) { console.error(e) }
+    }
+
+    function animCount(id, target, prefix, dec, money = false) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      let cur = 0; const dur = 1200; const step = target / (dur / 16);
+      const t = setInterval(() => {
+        cur = Math.min(cur + step, target);
+        const v = dec ? cur.toFixed(dec) : Math.floor(cur);
+        el.textContent = prefix + (money ? '$' + Math.round(cur).toLocaleString('es-CO') : v + (dec && !money ? '' : ''));
+        if (cur >= target) clearInterval(t);
+      }, 16);
+    }
+
+    function buildWaveBars(meses) {
+      const el = document.getElementById('wbars');
+      if (!meses || !meses.length) { el.innerHTML = '<span style="color:var(--muted);font-size:.8rem">Sin datos</span>'; return }
+      const max = Math.max(...meses.map(m => m.total));
+      const peak = meses.findIndex(m => m.total === max);
+      el.innerHTML = meses.map((m, i) => {
+        const h = Math.round((m.total / max) * 100);
+        const mo = m.mes.split('-')[1];
+        return `<div class="wb${i === peak ? ' peak' : ''}" style="height:${h}%" data-delay="${i * 40}">
+      <div class="wb-tip">${Math.round(m.total).toLocaleString()} kWh</div>
+      <div class="wb-lbl">${MONTHS[+mo - 1]}</div>
+    </div>`;
+      }).join('');
+      // Animate in
+      el.querySelectorAll('.wb').forEach((b, i) => {
+        const orig = b.style.height;
+        b.style.height = '0'; b.style.transition = 'none';
+        setTimeout(() => { b.style.transition = 'height .6s cubic-bezier(.22,1,.36,1)'; b.style.height = orig; }, i * 50 + 50);
+      });
+    }
+
+    function buildAreaLeg(areas) {
+      const el = document.getElementById('area-leg');
+      if (!areas || !areas.length) { el.innerHTML = ''; return }
+      const max = Math.max(...areas.map(a => a.total));
+      el.innerHTML = areas.map((a, i) => `
+    <div class="al-row">
+      <div class="al-dot" style="background:${ACOLORS[i]};box-shadow:0 0 6px ${ACOLORS[i]}"></div>
+      <span class="al-name">${a.area}</span>
+      <div class="al-bar-wrap"><div class="al-bar" data-w="${Math.round(a.pct)}" style="background:${ACOLORS[i]};width:0%"></div></div>
+      <span class="al-val" style="color:${ACOLORS[i]}">${a.pct}%</span>
+    </div>`).join('');
+      // Animate bars
+      setTimeout(() => { el.querySelectorAll('.al-bar').forEach(b => { b.style.width = b.dataset.w + '%' }) }, 100);
+    }
+
+    async function loadRecent() {
+      const el = document.getElementById('recent-tbl');
+      try {
+        const r = await fetch(API + '/consumos');
+        const rows = await r.json();
+        el.innerHTML = buildTable(rows.slice(0, 8), false);
+      } catch { el.innerHTML = '<div class="empty-state">Error cargando datos</div>' }
+    }
+
+    /* ══════ HISTORIAL ══════ */
+    async function loadAll() {
+      const el = document.getElementById('all-tbl');
+      el.innerHTML = '<div class="loader"><div class="loader-ring"></div><div class="loader-txt">Cargando registros...</div></div>';
+      try {
+        const r = await fetch(API + '/consumos');
+        const rows = await r.json();
+        el.innerHTML = buildTable(rows, true);
+      } catch { el.innerHTML = '<div class="empty-state">Error cargando datos</div>' }
+    }
+
+    function areaStyle(a) {
+      const map = {
+        'Aulas': 'background:rgba(0,255,224,.12);color:#00ffe0;border:1px solid rgba(0,255,224,.3)',
+        'Laboratorios': 'background:rgba(0,201,167,.12);color:#00c9a7;border:1px solid rgba(0,201,167,.3)',
+        'Administrativo': 'background:rgba(200,255,0,.1);color:#c8ff00;border:1px solid rgba(200,255,0,.25)',
+        'Otros': 'background:rgba(255,107,53,.1);color:#ff6b35;border:1px solid rgba(255,107,53,.25)',
+      };
+      return map[a] || 'background:rgba(255,61,107,.1);color:#ff3d6b;border:1px solid rgba(255,61,107,.25)';
+    }
+
+    function buildTable(rows, showDel) {
+      if (!rows.length) return '<div class="empty-state">No hay registros aún.</div>';
+      return `<div class="tbl-wrap"><table>
+    <thead><tr>
+      <th>Área</th><th>kWh</th><th>CO₂ (kg)</th><th>Medidor</th><th>Fecha</th>
+      ${showDel ? '<th></th>' : ''}
+    </tr></thead>
+    <tbody>${rows.map(r => `<tr>
+      <td><span class="area-tag" style="${areaStyle(r.area)}">${r.area}</span></td>
+      <td><span class="kwh-val">${Number(r.kwh).toLocaleString('es-CO')}</span></td>
+      <td><span class="co2-val">${r.co2_kg || '—'}</span></td>
+      <td><span class="date-val">${r.medidor || '—'}</span></td>
+      <td><span class="date-val">${r.fecha}</span></td>
+      ${showDel ? `<td><button class="icon-btn" onclick="delRow(${r.id})">🗑</button></td>` : ''}
+    </tr>`).join('')}
+    </tbody></table></div>`;
+    }
+
+    async function delRow(id) {
+      if (!confirm('¿Eliminar este registro de la base de datos?')) return;
+      await fetch(API + '/consumos/' + id, { method: 'DELETE' });
+      loadAll(); loadDash();
+    }
+
+    /* ══════ REGISTRO ══════ */
+    async function saveConsumo() {
+      const area = document.getElementById('f-area').value;
+      const kwh = parseFloat(document.getElementById('f-kwh').value);
+      const fecha = document.getElementById('f-fecha').value;
+      const medidor = document.getElementById('f-med').value;
+      const msg = document.getElementById('f-msg');
+      if (!kwh || !fecha) { msg.className = 'auth-msg err'; msg.textContent = 'Completa consumo y fecha'; return }
+      try {
+        const r = await fetch(API + '/consumos', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuario_id: user.id, area, kwh, fecha, medidor })
+        });
+        const d = await r.json();
+        if (d.ok) {
+          msg.textContent = '';
+          document.getElementById('rv-kwh').textContent = kwh.toLocaleString('es-CO');
+          document.getElementById('rv-co2').textContent = (d.co2_kg * 1000).toFixed(1) + 'g';
+          document.getElementById('rv-area').textContent = area;
+          document.getElementById('f-result').style.display = 'block';
+          document.getElementById('f-kwh').value = '';
+          document.getElementById('f-med').value = '';
+        }
+      } catch { msg.className = 'auth-msg err'; msg.textContent = 'Error de conexión' }
+    }
+
+    /* ══════ SIMULACIÓN ══════ */
+    function calcSim() {
+      const actualStr = document.getElementById('s-actual').value;
+      const pctStr = document.getElementById('s-pct').value;
+      const msg = document.getElementById('s-msg');
+      msg.className = 'auth-msg err'; msg.textContent = '';
+
+      if (!actualStr || !pctStr) {
+        document.getElementById('s-result').style.display = 'none';
+        return;
+      }
+
+      const actual = parseFloat(actualStr);
+      const pct = parseFloat(pctStr);
+
+      if (actual < 0) {
+        msg.textContent = 'El consumo no puede ser negativo.';
+        document.getElementById('s-result').style.display = 'none';
+        return;
+      }
+      if (pct < 0 || pct > 100) {
+        msg.textContent = 'El porcentaje debe estar entre 0% y 100%.';
+        document.getElementById('s-result').style.display = 'none';
+        return;
+      }
+
+      const tarifa = 750;
+      const factor_co2 = 0.4;
+      const proy = actual * (1 - (pct / 100));
+      const ahorro = (actual - proy) * tarifa;
+      const co2ev = (actual - proy) * factor_co2;
+
+      document.getElementById('sv-proy').textContent = parseFloat(proy.toFixed(2)).toLocaleString('es-CO');
+      document.getElementById('sv-cop').textContent = '$' + Math.round(ahorro).toLocaleString('es-CO');
+      document.getElementById('sv-co2').textContent = parseFloat(co2ev.toFixed(2));
+      document.getElementById('s-result').style.display = 'block';
+    }
+
+    async function simular() {
+      const actual = parseFloat(document.getElementById('s-actual').value);
+      const pct = parseFloat(document.getElementById('s-pct').value);
+      const desc = document.getElementById('s-desc').value;
+      const msg = document.getElementById('s-msg');
+
+      if (isNaN(actual) || isNaN(pct)) {
+        msg.className = 'auth-msg err'; msg.textContent = 'Completa los campos requeridos.';
+        return;
+      }
+      if (actual < 0 || pct < 0 || pct > 100) {
+        msg.className = 'auth-msg err'; msg.textContent = 'Corrige los errores antes de guardar.';
+        return;
+      }
+
+      msg.textContent = 'Guardando...';
+      try {
+        const r = await fetch(API + '/simulaciones', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuario_id: user.id, kwh_actual: actual, porcentaje_ahorro: pct, descripcion: desc })
+        });
+        const d = await r.json();
+        if (d.ok) {
+          loadSims();
+          document.getElementById('s-actual').value = '';
+          document.getElementById('s-pct').value = '';
+          document.getElementById('s-desc').value = '';
+          document.getElementById('s-result').style.display = 'none';
+          msg.className = 'auth-msg ok'; msg.textContent = '✓ Simulación guardada';
+          setTimeout(() => msg.textContent = '', 3000);
+        }
+      } catch (e) { console.error(e); msg.className = 'auth-msg err'; msg.textContent = 'Error de conexión' }
+    }
+
+    async function loadSims() {
+      const el = document.getElementById('sim-tbl');
+      try {
+        const r = await fetch(API + '/simulaciones');
+        const rows = await r.json();
+        if (!rows.length) { el.innerHTML = '<div class="empty-state">No hay simulaciones guardadas aún.</div>'; return }
+        el.innerHTML = `<div class="tbl-wrap"><table>
+      <thead><tr><th>Descripción</th><th>kWh actual</th><th>% ahorro</th><th>kWh proyectado</th><th>Ahorro COP</th><th>CO₂ evitado</th></tr></thead>
+      <tbody>${rows.map(r => `<tr>
+        <td>${r.descripcion || '—'}</td>
+        <td><span class="kwh-val">${Number(r.kwh_actual).toLocaleString()}</span></td>
+        <td><span class="area-tag" style="background:rgba(0,255,224,.1);color:var(--glow);border:1px solid var(--border)">${r.porcentaje_ahorro}%</span></td>
+        <td><span class="kwh-val" style="color:var(--glow2)">${Number(r.kwh_proyectado).toLocaleString()}</span></td>
+        <td><span class="kwh-val" style="color:var(--acid)">$${Math.round(r.ahorro_cop).toLocaleString()}</span></td>
+        <td><span class="co2-val">${r.co2_evitado} kg</span></td>
+      </tr>`).join('')}</tbody></table></div>`;
+      } catch { el.innerHTML = '<div class="empty-state">Error</div>' }
+    }
+
+    /* ══════ USUARIOS ══════ */
+    async function loadUsers() {
+      const el = document.getElementById('users-tbl');
+      try {
+        const r = await fetch(API + '/usuarios');
+        const rows = await r.json();
+        el.innerHTML = `<div class="tbl-wrap"><table>
+      <thead><tr><th>ID</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Registrado</th></tr></thead>
+      <tbody>${rows.map(u => `<tr>
+        <td><span class="date-val">#${u.id}</span></td>
+        <td><span class="user-row-avatar">🌿</span>${u.nombre}</td>
+        <td><span class="date-val">${u.correo}</span></td>
+        <td><span class="area-tag" style="${u.rol === 'admin' ? 'background:rgba(0,255,224,.12);color:#00ffe0;border:1px solid rgba(0,255,224,.3)' : 'background:rgba(0,201,167,.1);color:#00c9a7;border:1px solid rgba(0,201,167,.25)'}">${u.rol}</span></td>
+        <td><span class="date-val">${u.created_at.slice(0, 10)}</span></td>
+      </tr>`).join('')}</tbody></table></div>`;
+      } catch { el.innerHTML = '<div class="empty-state">Error</div>' }
+    }
+  </script>
+</body>
+
+</html>
